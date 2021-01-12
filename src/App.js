@@ -1,49 +1,64 @@
-import './App.css';
-import React, {useEffect, useState} from "react";
-import Recipe from './Recipe';
-import { recipesList } from './data';
+import React, { Component } from 'react';
 
-const App = () => {
+import Search from './components/Search';
+import ShortList from './components/ShortList';
+import NamesList from './components/NamesList';
 
-    const [search, setSearch] = useState('');
-    const [recipes, setRecipes] = useState([]);
-    const [query, setQuery] = useState('');
+/* ############################## */
+/* ##### Main app component ##### */
+/* ############################## */
 
+class App extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      filterText: '',
+      favourites: []
+    }
+  }
+  
+  // update filterText in state when user types 
+  filterUpdate(value) {
+    this.setState({
+      filterText: value
+    });
+  }
+  
+  /* ############################# */
+  /* ##### the render method ##### */
+  /* ############################# */
 
-    useEffect(() => {
-        setRecipes(recipesList.hits);
-    }, [query]);
+  render() {
+    const hasSearch = this.state.filterText.length > 0
+    return ( 
+      <div>
+        <header>
+          <Search
+            filterVal={this.state.filterText}
+            filterUpdate={this.filterUpdate.bind(this)}
+          /> 
+        </header>
+        <main>
+          <NamesList 
+            data={this.props.data}
+            filter={this.state.filterText}
+          />
+          {/* 
+            Show only if user has typed in search.
+            To reset the input field, we pass an 
+            empty value to the filterUpdate method
+          */}
+          {hasSearch &&
+            <button
+              onClick={this.filterUpdate.bind(this, '')}>
+              Clear Search
+            </button>
+          }
 
-    const updateSearch = e => {
-      setSearch(e.target.value);
-    };
-
-    const getSearch = e => {
-      e.preventDefault();
-      setQuery(search);
-      setSearch('');
-    };
-
-    return(
-        <div className="App">
-            <form onSubmit={getSearch} className="search-form">
-                <input className="search-bar" type="text" value={search} onChange={updateSearch}/>
-                <button className="search-button" type="submit">
-                    Search
-                </button>
-            </form>
-            <div className="recipes">
-                {recipes.map(recipe => (
-                    <Recipe
-                        key = {recipe.recipe.label}
-                        title = {recipe.recipe.label}
-                        calories = {recipe.recipe.calories}
-                        image = {recipe.recipe.image}
-                        ingredients = {recipe.recipe.ingredientLines}/>
-                ))}
-            </div>
-        </div>
+        </main>
+      </div>
     )
+  }
 }
 
 export default App;
